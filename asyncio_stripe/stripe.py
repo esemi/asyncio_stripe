@@ -499,6 +499,40 @@ class Client(object):
         '''
         return await self._req('get', '/refunds', params=kwds)
 
+    async def create_source(self, **kwds):
+        """
+        Create a new source
+
+        Keyword arguments can be passed as defined by:
+        https://stripe.com/docs/api/sources/create?lang=curl
+
+        @return - created Source
+
+        @raises StripeError - Parsed errors from stripe
+        @raises ParseError  - Parsing Source instance failed
+        """
+
+        return await self._req('post', '/sources', params=kwds)
+
+    async def retrieve_source(self, source_id: str):
+        """
+        Retrieve a source
+
+        @param source_id- source identifier
+        @return - matching Source instance
+
+        @raises StripeError - Parsed errors from stripe
+        @raises ParseError  - Parsing Source instance failed
+        """
+
+        return await self._req('get', '/sources/%s' % (source_id,))
+
+    async def close(self):
+        try:
+            await self._session.close()
+        except RuntimeError:
+            pass
+
 
 cls_map = {
     'charge': Charge,
