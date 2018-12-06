@@ -3,9 +3,9 @@ import os
 import sys
 import unittest.mock
 
-import aiohttp
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 def run_until(test, timeout=1.0, loop=None, pre=None):
     """
@@ -59,11 +59,11 @@ def run_until(test, timeout=1.0, loop=None, pre=None):
 
 
 def mkfuture(ret, return_from=None):
-    '''
+    """
     Make a asyncio.Future with the result set to `ret`.  If specified,
     `return_from` is assumed to be a unittest.mock.Mock object we can
     set return_value on.
-    '''
+    """
     f = asyncio.Future()
     f.set_result(ret)
 

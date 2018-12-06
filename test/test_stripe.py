@@ -1,5 +1,4 @@
 import asyncio
-import decimal
 import json
 import logging
 import sys
@@ -7,7 +6,6 @@ import unittest
 import unittest.mock
 
 import aiohttp
-import attr
 import multidict
 
 import base
@@ -20,7 +18,7 @@ class TestClient(unittest.TestCase):
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
         self._session = unittest.mock.MagicMock(spec=aiohttp.ClientSession)
-        self._stripe = stripe.Client(self._session, 'sekret_key')
+        self._stripe = stripe.Client(self._session, 'secret_key')
 
     def tearDown(self):
         self._loop.close()
@@ -261,11 +259,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.create_charge(amount=103, currency='usd', k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/charges')
         self.assertEqual(kwds['params'], {'amount': 103, 'currency': 'usd', 'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(charge))
@@ -284,11 +282,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.retrieve_charge('ch_aabbcc'))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'GET')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/charges/ch_aabbcc')
         self.assertEqual(kwds['params'], {})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(charge))
@@ -307,11 +305,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.update_charge('ch_aabbcc', k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/charges/ch_aabbcc')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(charge))
@@ -330,11 +328,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.capture_charge('ch_aabbcc', k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/charges/ch_aabbcc/capture')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(charge))
@@ -353,11 +351,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.list_charges(k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'GET')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/charges')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, [stripe.convert_json_response(charge)])
@@ -376,11 +374,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.create_customer(k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(customer))
@@ -399,11 +397,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.retrieve_customer('cus_aabbcc'))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'GET')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers/cus_aabbcc')
         self.assertEqual(kwds['params'], {})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(customer))
@@ -422,11 +420,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.update_customer('cus_aabbcc', k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers/cus_aabbcc')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(customer))
@@ -444,11 +442,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.delete_customer('cus_aabbcc'))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'DELETE')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers/cus_aabbcc')
         self.assertEqual(kwds['params'], {})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertIs(r, None)
@@ -467,11 +465,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.list_customers(k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'GET')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, [stripe.convert_json_response(customer)])
@@ -490,11 +488,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.create_card('cus_aabbcc', 'source_token', metadata={'k': '1', 'j': 2}))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers/cus_aabbcc/sources')
         self.assertEqual(kwds['params'], {'source': 'source_token', 'metadata[k]': '1', 'metadata[j]': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(card))
@@ -513,11 +511,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.update_card('cus_aabbcc', 'card_abc', metadata={'k': '1', 'j': 2}))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers/cus_aabbcc/sources/card_abc')
         self.assertEqual(kwds['params'], {'metadata[k]': '1', 'metadata[j]': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(card))
@@ -535,11 +533,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.delete_card('cus_aabbcc', 'card_aabbcc'))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'DELETE')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/customers/cus_aabbcc/sources/card_aabbcc')
         self.assertEqual(kwds['params'], {})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertIs(r, None)
@@ -558,11 +556,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.create_refund('ch_aabbcc', k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/refunds')
         self.assertEqual(kwds['params'], {'charge': 'ch_aabbcc', 'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(refund))
@@ -581,11 +579,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.retrieve_refund('re_aabbcc'))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'GET')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/refunds/re_aabbcc')
         self.assertEqual(kwds['params'], {})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(refund))
@@ -604,11 +602,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.update_refund('re_aabbcc', {'k': '1', 'j': 2}))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/refunds/re_aabbcc')
         self.assertEqual(kwds['params'], {'metadata[k]': '1', 'metadata[j]': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(refund))
@@ -627,11 +625,11 @@ class TestClient(unittest.TestCase):
         }
 
         r = base.run_until(self._stripe.list_refunds(k='1', j=2))
-        args, kwds  = self._session.request.call_args
+        args, kwds = self._session.request.call_args
         self.assertEqual(args[0], 'GET')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/refunds')
         self.assertEqual(kwds['params'], {'k': '1', 'j': 2})
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, [stripe.convert_json_response(refund)])
@@ -654,7 +652,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(args[0], 'POST')
         self.assertEqual(args[1], 'https://api.stripe.com/v1/sources')
         self.assertEqual({'amount': 100.09, 'owner[email]': 'unittest@email', 'type': 'wechat'}, kwds['params'])
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(source))
@@ -677,7 +675,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual('GET', args[0])
         self.assertEqual('https://api.stripe.com/v1/sources/src_s56ad6a54da', args[1])
         self.assertEqual({}, kwds['params'])
-        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].login, 'secret_key')
         self.assertEqual(kwds['auth'].password, '')
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, stripe.convert_json_response(source))
