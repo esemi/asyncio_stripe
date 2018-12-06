@@ -187,20 +187,25 @@ class Source(object):
     usage = attr.ib()
 
 
+DEFAULT_VERSION = '2017-02-14'
+LAST_VERSION = '2018-11-08'
+
+
 class Client(object):
-    def __init__(self, session, pk):
-        '''
+    def __init__(self, session, pk, version=DEFAULT_VERSION):
+        """
         Create a new Stripe client
 
         @param session  - aiohttp session
         @param pk       - private stripe key
-        '''
+        """
         self._session = session
         self._auth = aiohttp.BasicAuth(pk)
         self._url = 'https://api.stripe.com/v1'
+        self._version = version
 
     async def _req(self, method, page, params=None):
-        '''
+        """
         Issue a request to the given page relative to the base Stripe API URL.
 
         @param method   - http method
@@ -210,11 +215,11 @@ class Client(object):
 
         @raises StripeError on error from stripe
         @raises ParseError on failing to parse Stripe Object
-        '''
+        """
         url = self._url + '/' + page.lstrip('/')
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Stripe-Version': '2017-02-14',
+            'Stripe-Version': self._version,
         }
 
         if params is None:
@@ -258,7 +263,7 @@ class Client(object):
         return convert_json_response(body)
 
     async def create_charge(self, amount, currency, **kwds):
-        '''
+        """
         Create a new charge.
 
         Keyword arguments can be passed as defined by:
@@ -270,12 +275,12 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         params = {'amount': amount, 'currency': currency, **kwds}
         return await self._req('post', '/charges', params=params)
 
     async def retrieve_charge(self, charge_id):
-        '''
+        """
         Retrieve a charge
 
         @param charge_id - charge identifier
@@ -283,11 +288,11 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req('get', '/charges/%s' % (charge_id,))
 
     async def update_charge(self, charge_id, **kwds):
-        '''
+        """
         Update a charge.
 
         Keyword arguments can be passed as defined by:
@@ -298,14 +303,14 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req(
                 'post',
                 '/charges/%s' % (charge_id,),
                 params=kwds)
 
     async def capture_charge(self, charge_id, **kwds):
-        '''
+        """
         Capture payment of a charge previously created with capture=False.
 
         Keyword arguments can be passed as defined by:
@@ -316,14 +321,14 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req(
                 'post',
                 '/charges/%s/capture' % (charge_id,),
                 params=kwds)
 
     async def list_charges(self, **kwds):
-        '''
+        """
         Return a list of previously created charges matching the given
         parameters.
 
@@ -334,11 +339,11 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req('get', '/charges', params=kwds)
 
     async def create_customer(self, **kwds):
-        '''
+        """
         Create a new customer
 
         Keyword arguments can be passed as defined by:
@@ -348,11 +353,11 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req('post', '/customers', params=kwds)
 
     async def retrieve_customer(self, customer_id):
-        '''
+        """
         Retrieve a customer
 
         @param customer_id  - customer identifier
@@ -360,11 +365,11 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req('get', '/customers/%s' % (customer_id,))
 
     async def update_customer(self, customer_id, **kwds):
-        '''
+        """
         Update a customer
 
         Keyword arguments can be passed as defined by:
@@ -375,24 +380,24 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req(
             'post',
             '/customers/%s' % (customer_id,),
             params=kwds)
 
     async def delete_customer(self, customer_id):
-        '''
+        """
         Delete a customer
 
         @param customer_id  - customer identifier
 
         @raises StripeError - Parsed errors from stripe
-        '''
+        """
         await self._req('delete', '/customers/%s' % (customer_id,))
 
     async def list_customers(self, **kwds):
-        '''
+        """
         Return a list of previously created charges matching the given
         parameters.
 
@@ -403,11 +408,11 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Charge instance failed
-        '''
+        """
         return await self._req('get', '/customers', params=kwds)
 
     async def create_card(self, customer_id, source, metadata=None):
-        '''
+        """
         Create a new credit card for the specified customer
 
         @param customer_id  - customer identifier
@@ -417,7 +422,7 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Card instance failed
-        '''
+        """
         params = {'source': source}
         if metadata is not None:
             params['metadata'] = metadata
@@ -428,7 +433,7 @@ class Client(object):
                 params=params)
 
     async def delete_card(self, customer_id, source_id):
-        '''
+        """
         Delete a credit card from the specified customer
 
         @param customer_id  - customer identifier
@@ -436,13 +441,13 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Card instance failed
-        '''
+        """
         await self._req(
             'delete',
             '/customers/%s/sources/%s' % (customer_id, source_id))
 
     async def update_card(self, customer_id, source_id, **kwds):
-        '''
+        """
         Update card details
 
         Keyword arguments can be passed as defined by:
@@ -454,14 +459,14 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Card instance failed
-        '''
+        """
         return await self._req(
                 'post',
                 '/customers/%s/sources/%s' % (customer_id, source_id),
                 params=kwds)
 
     async def create_refund(self, charge_id, **kwds):
-        '''
+        """
         Refund all or part of a charge.
 
         Keyword arguments can be passed as defined by:
@@ -472,13 +477,13 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Refund instance failed
-        '''
+        """
         params = {'charge': charge_id}
         params.update(kwds)
         return await self._req('post', '/refunds', params)
 
     async def retrieve_refund(self, refund_id):
-        '''
+        """
         Retrieve a refund
 
         @param refund_id    - refund identifier
@@ -486,11 +491,11 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Refund instance failed
-        '''
+        """
         return await self._req('get', '/refunds/%s' % (refund_id,))
 
     async def update_refund(self, refund_id, metadata):
-        '''
+        """
         Update the metadata on a refund.  Keys can be removed by setting the
         value to None for that key.
 
@@ -500,12 +505,12 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Refund instance failed
-        '''
+        """
         params = {'metadata': metadata}
         return await self._req('post', '/refunds/%s' % (refund_id,), params)
 
     async def list_refunds(self, **kwds):
-        '''
+        """
         Return a list of previously refunds matching the given parameters.
 
         Keyword arguments can be passed as defined by:
@@ -515,7 +520,7 @@ class Client(object):
 
         @raises StripeError - Parsed errors from stripe
         @raises ParseError  - Parsing Refund instance failed
-        '''
+        """
         return await self._req('get', '/refunds', params=kwds)
 
     async def create_source(self, **kwds):
