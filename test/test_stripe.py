@@ -25,6 +25,29 @@ class TestClient(unittest.TestCase):
     def tearDown(self):
         self._loop.close()
 
+    def test_parse_source(self):
+        j = json.loads(source_json)
+        r = stripe.convert_json_response(j)
+        keys = (
+            'id',
+            'ach_credit_transfer',
+            'amount',
+            'client_secret',
+            'created',
+            'currency',
+            'flow',
+            'livemode',
+            'metadata',
+            'owner',
+            'receiver',
+            'statement_descriptor',
+            'status',
+            'type',
+            'usage'
+        )
+        for key in keys:
+            self.assertEqual(j[key], getattr(r, key))
+
     def test_parse_charge(self):
         j = json.loads(charge_json)
         r = stripe.convert_json_response(j)
@@ -212,9 +235,9 @@ class TestClient(unittest.TestCase):
         charge = json.loads(charge_json)
         base.mkfuture(charge, resp.json)
 
-        r = base.run_until(self._stripe.create_charge(amount=103, currency='usd', k='1', j=2,
-            metadata={'md1': 'hi', 'md2': 'other'}, tf=True))
-        args, kwds  = self._session.request.call_args
+        base.run_until(self._stripe.create_charge(amount=103, currency='usd', k='1', j=2,
+                                                  metadata={'md1': 'hi', 'md2': 'other'}, tf=True))
+        args, kwds = self._session.request.call_args
         self.assertEqual(kwds['params'], {
             'amount': 103,
             'currency': 'usd',
@@ -613,6 +636,52 @@ class TestClient(unittest.TestCase):
         self.assertEqual(kwds['headers'], expected_headers)
         self.assertEqual(r, [stripe.convert_json_response(refund)])
 
+    def test_create_source(self):
+        resp = unittest.mock.MagicMock(spec=aiohttp.client_reqrep.ClientResponse)
+        resp.status = 200
+        resp.headers = multidict.CIMultiDict({'content-type': 'application/json'})
+        base.mkfuture(resp, self._session.request)
+        source = json.loads(source_json)
+        base.mkfuture(source, resp.json)
+
+        expected_headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Stripe-Version': '2017-02-14',
+        }
+
+        r = base.run_until(self._stripe.create_source(amount=100.09, type='wechat', owner={'email': 'unittest@email'}))
+        args, kwds = self._session.request.call_args
+        self.assertEqual(args[0], 'POST')
+        self.assertEqual(args[1], 'https://api.stripe.com/v1/sources')
+        self.assertEqual({'amount': 100.09, 'owner[email]': 'unittest@email', 'type': 'wechat'}, kwds['params'])
+        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].password, '')
+        self.assertEqual(kwds['headers'], expected_headers)
+        self.assertEqual(r, stripe.convert_json_response(source))
+
+    def test_retrieve_source(self):
+        resp = unittest.mock.MagicMock(spec=aiohttp.client_reqrep.ClientResponse)
+        resp.status = 200
+        resp.headers = multidict.CIMultiDict({'content-type': 'application/json'})
+        base.mkfuture(resp, self._session.request)
+        source = json.loads(source_json)
+        base.mkfuture(source, resp.json)
+
+        expected_headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Stripe-Version': '2017-02-14',
+        }
+
+        r = base.run_until(self._stripe.retrieve_source('src_s56ad6a54da'))
+        args, kwds = self._session.request.call_args
+        self.assertEqual('GET', args[0])
+        self.assertEqual('https://api.stripe.com/v1/sources/src_s56ad6a54da', args[1])
+        self.assertEqual({}, kwds['params'])
+        self.assertEqual(kwds['auth'].login, 'sekret_key')
+        self.assertEqual(kwds['auth'].password, '')
+        self.assertEqual(kwds['headers'], expected_headers)
+        self.assertEqual(r, stripe.convert_json_response(source))
+
 
 # Test data scraped from API documentation
 charge_json = '''
@@ -796,10 +865,55 @@ refund_json = '''
 }
 '''
 
+source_json = """
+{
+  "id": "src_1De3EcDG5q9yxIerRAvVfNa5",
+  "object": "source",
+  "ach_credit_transfer": {
+    "account_number": "test_52796e3294dc",
+    "routing_number": "110000000",
+    "fingerprint": "ecpwEzmBOSMOqQTL",
+    "bank_name": "TEST BANK",
+    "swift_code": "TSTEZ122"
+  },
+  "amount": null,
+  "client_secret": "src_client_secret_E6FkV8gF8OtbgQViHV5VkCvH",
+  "created": 1544027306,
+  "currency": "usd",
+  "flow": "receiver",
+  "livemode": false,
+  "metadata": {
+  },
+  "owner": {
+    "address": "sdsdsd",
+    "email": "jenny.rosen@example.com",
+    "name": null,
+    "phone": null,
+    "verified_address": null,
+    "verified_email": null,
+    "verified_name": null,
+    "verified_phone": null
+  },
+  "receiver": {
+    "address": "121042882-38381234567890123",
+    "amount_charged": 0,
+    "amount_received": 0,
+    "amount_returned": 0,
+    "refund_attributes_method": "email",
+    "refund_attributes_status": "missing"
+  },
+  "statement_descriptor": null,
+  "status": "pending",
+  "type": "ach_credit_transfer",
+  "usage": "reusable"
+}
+"""
+
 
 def main():
     logging.basicConfig(level=logging.DEBUG if '-v' in sys.argv else logging.CRITICAL + 1)
     unittest.main()
+
 
 if __name__ == '__main__':
     main()

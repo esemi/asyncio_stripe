@@ -168,6 +168,25 @@ class Refund(object):
     # description = attr.ib()
 
 
+@attr.s(slots=True, frozen=True)
+class Source(object):
+    id = attr.ib()
+    ach_credit_transfer = attr.ib(metadata={'expandable': True})
+    amount = attr.ib()
+    client_secret = attr.ib()
+    created = attr.ib()
+    currency = attr.ib()
+    metadata = attr.ib()
+    flow = attr.ib()
+    livemode = attr.ib()
+    owner = attr.ib()
+    receiver = attr.ib()
+    statement_descriptor = attr.ib()
+    status = attr.ib()
+    type = attr.ib()
+    usage = attr.ib()
+
+
 class Client(object):
     def __init__(self, session, pk):
         '''
@@ -527,18 +546,13 @@ class Client(object):
 
         return await self._req('get', '/sources/%s' % (source_id,))
 
-    async def close(self):
-        try:
-            await self._session.close()
-        except RuntimeError:
-            pass
-
 
 cls_map = {
     'charge': Charge,
     'customer': Customer,
     'card': Card,
     'refund': Refund,
+    'source': Source,
 }
 
 
