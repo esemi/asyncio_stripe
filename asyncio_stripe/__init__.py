@@ -5,11 +5,6 @@ from .stripe import (
     ParseError,
     DeletionError,
 
-    Charge,
-    Customer,
-    Card,
-    Source,
-
     Client,
 
     LAST_VERSION,

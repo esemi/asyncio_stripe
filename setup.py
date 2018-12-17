@@ -13,7 +13,7 @@ def read(paths):
 
 setuptools.setup(
         name='asyncio_stripe',
-        version='0.2.1-custom-1',
+        version='0.3.0-custom',
         description='Asyncio Stripe API bindings',
         license='BSD',
         long_description=(read('README.rst')),
@@ -36,8 +36,8 @@ setuptools.setup(
             'License :: OSI Approved :: BSD License',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 3 :: Only',
-            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
             'Topic :: Internet :: WWW/HTTP',
             'Topic :: Software Development :: Libraries :: Python Modules',
         ]

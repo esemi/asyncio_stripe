@@ -1,5 +1,4 @@
 import aiohttp
-import attr
 
 
 class StripeException(Exception):
@@ -48,143 +47,6 @@ class ParseError(StripeException):
 
 class DeletionError(StripeException):
     pass
-
-
-@attr.s(slots=True, frozen=True)
-class Charge(object):
-    id = attr.ib()
-    amount = attr.ib()
-    amount_refunded = attr.ib()
-    application = attr.ib(metadata={'expandable': True})
-    application_fee = attr.ib(metadata={'expandable': True})
-    balance_transaction = attr.ib(metadata={'expandable': True})
-    captured = attr.ib()
-    created = attr.ib()
-    currency = attr.ib()
-    customer = attr.ib(metadata={'expandable': True})
-    description = attr.ib()
-    destination = attr.ib(metadata={'expandable': True})
-    dispute = attr.ib(metadata={'expandable': True})
-    failure_code = attr.ib()
-    failure_message = attr.ib()
-    fraud_details = attr.ib()
-    invoice = attr.ib(metadata={'expandable': True})
-    livemode = attr.ib()
-    metadata = attr.ib()
-    on_behalf_of = attr.ib(metadata={'expandable': True})
-    order = attr.ib(metadata={'expandable': True})
-    outcome = attr.ib()
-    paid = attr.ib()
-    receipt_email = attr.ib()
-    receipt_number = attr.ib()
-    refunded = attr.ib()
-    refunds = attr.ib()
-    review = attr.ib(metadata={'expandable': True})
-    shipping = attr.ib()
-    source = attr.ib()
-    source_transfer = attr.ib(metadata={'expandable': True})
-    statement_descriptor = attr.ib()
-    status = attr.ib()
-    transfer_group = attr.ib()
-
-    # Only when created with destination set
-    transfer = attr.ib(metadata={'expandable': True}, default=None)
-
-
-@attr.s(slots=True, frozen=True)
-class Customer(object):
-    id = attr.ib()
-    account_balance = attr.ib()
-    created = attr.ib()
-    currency = attr.ib()
-    default_source = attr.ib(metadata={'expandable': True})
-    delinquent = attr.ib()
-    description = attr.ib()
-    discount = attr.ib()
-    email = attr.ib()
-    invoice_prefix = attr.ib()
-    livemode = attr.ib()
-    metadata = attr.ib()
-    shipping = attr.ib()
-    sources = attr.ib()
-
-    # Not returned when customer has no subscriptions
-    subscriptions = attr.ib(default=attr.Factory(list))
-
-    # In documentation but not seen
-    # business_vat_id = attr.ib()
-
-
-@attr.s(slots=True, frozen=True)
-class Card(object):
-    id = attr.ib()
-    address_city = attr.ib()
-    address_country = attr.ib()
-    address_line1 = attr.ib()
-    address_line1_check = attr.ib()
-    address_line2 = attr.ib()
-    address_state = attr.ib()
-    address_zip = attr.ib()
-    address_zip_check = attr.ib()
-    brand = attr.ib()
-    country = attr.ib()
-    customer = attr.ib(metadata={'expandable': True})
-    cvc_check = attr.ib()
-    dynamic_last4 = attr.ib()
-    exp_month = attr.ib()
-    exp_year = attr.ib()
-    fingerprint = attr.ib()
-    funding = attr.ib()
-    last4 = attr.ib()
-    metadata = attr.ib()
-    name = attr.ib()
-    tokenization_method = attr.ib()
-
-    # Managed accounts only
-    # account = attr.ib(metadata={'expandable': True})
-    # currency = attr.ib(metadata={'expandable': True})
-    # default_for_currency = attr.ib(metadata={'expandable': True})
-    # recipient = attr.ib(metadata={'expandable': True})
-
-    # In documentation but not seen
-    # available_payout_methods = attr.ib()
-    # three_d_secure = attr.ib()
-
-
-@attr.s(slots=True, frozen=True)
-class Refund(object):
-    id = attr.ib()
-    amount = attr.ib()
-    balance_transaction = attr.ib(metadata={'expandable': True})
-    charge = attr.ib(metadata={'expandable': True})
-    created = attr.ib()
-    currency = attr.ib()
-    metadata = attr.ib()
-    reason = attr.ib()
-    receipt_number = attr.ib()
-    status = attr.ib()
-
-    # In documentation but not seen
-    # description = attr.ib()
-
-
-@attr.s(slots=True, frozen=True)
-class Source(object):
-    id = attr.ib()
-    ach_credit_transfer = attr.ib(metadata={'expandable': True})
-    amount = attr.ib()
-    client_secret = attr.ib()
-    created = attr.ib()
-    currency = attr.ib()
-    metadata = attr.ib()
-    flow = attr.ib()
-    livemode = attr.ib()
-    owner = attr.ib()
-    receiver = attr.ib()
-    statement_descriptor = attr.ib()
-    status = attr.ib()
-    type = attr.ib()
-    usage = attr.ib()
 
 
 DEFAULT_VERSION = '2017-02-14'
@@ -552,37 +414,16 @@ class Client(object):
         return await self._req('get', '/sources/%s' % (source_id,))
 
 
-cls_map = {
-    'charge': Charge,
-    'customer': Customer,
-    'card': Card,
-    'refund': Refund,
-    'source': Source,
-}
-
-
 def convert_json_response(resp):
     if isinstance(resp, list):
         return [convert_json_response(r) for r in resp]
-    elif isinstance(resp, dict) and resp.get('object', '') in cls_map:
-        resp = resp.copy()
-        cls = cls_map[resp['object']]
-        del resp['object']
-
-        for k in (k for k, v in resp.items() if isinstance(v, (list, dict))):
-            resp[k] = convert_json_response(resp[k])
-
-        return cls(**resp)
     elif isinstance(resp, dict) and resp.get('object', '') == 'list':
         return [convert_json_response(r) for r in resp['data']]
-
     return resp
 
 
 def create_json_request(req):
-    if isinstance(req, tuple(cls_map.values())):
-        return create_json_request(attr.asdict(req))
-    elif isinstance(req, dict):
+    if isinstance(req, dict):
         return {k: create_json_request(v) for k, v in req.items()}
     elif isinstance(req, list):
         return [create_json_request(v) for v in req]
