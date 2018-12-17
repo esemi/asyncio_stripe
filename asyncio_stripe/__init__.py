@@ -8,6 +8,9 @@ from .stripe import (
     Charge,
     Customer,
     Card,
+    Source,
 
     Client,
+
+    LAST_VERSION,
 )

@@ -5,13 +5,15 @@ import setuptools
 
 topdir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
+
 def read(paths):
     with open(os.path.join(topdir, paths), 'r') as fp:
         return fp.read()
 
+
 setuptools.setup(
         name='asyncio_stripe',
-        version='0.2.1',
+        version='0.2.1-custom-1',
         description='Asyncio Stripe API bindings',
         license='BSD',
         long_description=(read('README.rst')),
